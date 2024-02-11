@@ -3,28 +3,27 @@ project(Nerd2D)
 
 set(CMAKE_CXX_STANDARD 11)
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build the library as a shared library")
+set(CPM_DOWNLOAD_LOCATION ${CMAKE_BINARY_DIR}/CPM.cmake)
+
+file(DOWNLOAD
+    https://github.com/cpm-cmake/CPM.cmake/releases/latest/download/cpm.cmake
+    ${CPM_DOWNLOAD_LOCATION})
+
+include(${CPM_DOWNLOAD_LOCATION})
+
 file(GLOB ENGINE_SRC src/*.cpp)
 
-include(FetchContent)
-
-FetchContent_Declare(
-    SDL
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL
+CPMAddPackage(
+    NAME sdl
+    GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
     GIT_TAG SDL2)
 
-FetchContent_MakeAvailable(SDL)
-
-FetchContent_Populate(
-    imgui
-    GIT_REPOSITORY https://github.com/ocornut/imgui
+CPMAddPackage(
+    NAME imgui
+    GIT_REPOSITORY "https://github.com/ocornut/imgui"
     GIT_TAG master)
 
 add_executable(Nerd2D ${ENGINE_SRC})
-include_directories(
-    ${sdl_SOURCE_DIR}/include
-    ${imgui_SOURCE_DIR}
-    ${imgui_SOURCE_DIR}/backends
-    ${imgui_SOURCE_DIR}/misc/cpp)
 
 add_library(imgui
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -36,7 +35,11 @@ add_library(imgui
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp
     ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp)
 
-add_dependencies(imgui SDL2::SDL2)
-target_link_libraries(imgui PRIVATE SDL2)
+include_directories(
+    ${sdl_SOURCE_DIR}/include
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+    ${imgui_SOURCE_DIR}/misc/cpp)
 
+target_link_libraries(imgui SDL2::SDL2)
 target_link_libraries(Nerd2D SDL2::SDL2 imgui)
